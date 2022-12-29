@@ -66,5 +66,15 @@ public:
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 	IOnlineSessionPtr OnlineSessionInterface;
+
+protected:
+
+	UFUNCTION(BlueprintCallable)
+		void CreateSession();
+
+	UFUNCTION(BlueprintCallable)
+		void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
+
+	FOnCreateSessionCompleteDelegate OnCreateSessionCompleteDelegate;
 };
 
