@@ -22,6 +22,9 @@ void UMenu::MenuSetup()
 			PC->SetShowMouseCursor(true);
 		}
 	}
+
+	UGameInstance* GI = GetGameInstance();
+	if (GI) MultiplayerSupportSubsystem = GI->GetSubsystem<UMultiplayerSupportSubsystem>();
 }
 
 bool UMenu::Initialize()
@@ -47,6 +50,11 @@ void UMenu::OnClickHostButton()
 			FColor::Blue,
 			FString::Printf(TEXT("Host Button Clicked"))
 		);
+	}
+
+	if (MultiplayerSupportSubsystem)
+	{
+		MultiplayerSupportSubsystem->CreateSession(4, FString("FreeForAll"));
 	}
 }
 
