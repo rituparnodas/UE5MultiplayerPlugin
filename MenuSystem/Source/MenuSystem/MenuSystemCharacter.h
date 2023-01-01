@@ -9,6 +9,8 @@
 
 #include "MenuSystemCharacter.generated.h"
 
+//#define PrintMsg(Color, Msg) { if (GEngine) { GEngine->AddOnScreenDebugMessage(-1,15.f, Color, Msg } }
+
 
 UCLASS(config=Game)
 class AMenuSystemCharacter : public ACharacter
@@ -73,8 +75,19 @@ protected:
 		void CreateSession();
 
 	UFUNCTION(BlueprintCallable)
-		void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
+		void FindSession();
+
+	UFUNCTION(BlueprintCallable)
+		void JoinGameSession();
+	
+	void OnCreateSessionComplete(FName SessionName, bool bWasSuccessful);
+	void OnFindSessionsComplete(bool bWasSuccessful);
+	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
+
+	TSharedPtr<FOnlineSessionSearch> SessionSearch;
 
 	FOnCreateSessionCompleteDelegate OnCreateSessionCompleteDelegate;
+	FOnFindSessionsCompleteDelegate OnFindSessionsCompleteDelegate;
+	FOnJoinSessionCompleteDelegate OnJoinSessionCompleteDelegate;
 };
 
