@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "Menu.generated.h"
 
+class UButton;
+
 /**
  * 
  */
@@ -18,5 +20,25 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		void MenuSetup();
+
+protected:
+
+	virtual bool Initialize() override;
+
 	
+private:
+
+	UPROPERTY(meta = (BindWidget))
+		UButton* HostButton;
+
+	UPROPERTY(meta = (BindWidget))
+		UButton* JoinButton;
+
+	UFUNCTION()
+		void OnClickHostButton();
+
+	UFUNCTION()
+		void OnClickJoinButton();
+
+	class UMultiplayerSupportSubsystem* MultiplayerSupportSubsystem;
 };
