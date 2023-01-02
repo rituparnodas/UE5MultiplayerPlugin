@@ -19,11 +19,14 @@ class MULTIPLAYERSUPPORT_API UMenu : public UUserWidget
 public:
 
 	UFUNCTION(BlueprintCallable)
-		void MenuSetup();
+		void MenuSetup(int32 PublicConnections = 4, FString TypeOfMatch = TEXT("FreeForAll"));
+
+	void MenuTearDown();
 
 protected:
 
 	virtual bool Initialize() override;
+	virtual void NativeDestruct() override;
 
 	
 private:
@@ -41,4 +44,7 @@ private:
 		void OnClickJoinButton();
 
 	class UMultiplayerSupportSubsystem* MultiplayerSupportSubsystem;
+
+	int32 NumOfpublicConnection{4};
+	FString MatchType{ TEXT("FreeForAll") };
 };

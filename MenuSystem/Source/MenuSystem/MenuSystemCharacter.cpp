@@ -205,7 +205,7 @@ void AMenuSystemCharacter::OnCreateSessionComplete(FName SessionName, bool bWasS
 			UWorld* World = GetWorld();
 			if (World)
 			{
-				World->ServerTravel(FString("Game/ThirdPerson/Maps/Lobby?listen"));
+				World->ServerTravel(FString("/Game/ThirdPerson/Maps/Lobby?listen"));
 			}
 		}
 		else

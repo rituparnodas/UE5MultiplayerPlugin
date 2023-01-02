@@ -4,8 +4,11 @@
 #include "MultiplayerSupportSubsystem.h"
 #include "Components/Button.h"
 
-void UMenu::MenuSetup()
+void UMenu::MenuSetup(int32 PublicConnections, FString TypeOfMatch)
 {
+	NumOfpublicConnection = PublicConnections;
+	MatchType = TypeOfMatch;
+
 	AddToViewport();
 	SetVisibility(ESlateVisibility::Visible);
 	bIsFocusable = true;
@@ -27,6 +30,23 @@ void UMenu::MenuSetup()
 	if (GI) MultiplayerSupportSubsystem = GI->GetSubsystem<UMultiplayerSupportSubsystem>();
 }
 
+void UMenu::MenuTearDown()
+{
+	RemoveFromParent();
+
+	UWorld* WorldPtr = GetWorld();
+	if (WorldPtr)
+	{
+		APlayerController* PC = WorldPtr->GetFirstPlayerController();
+		if (PC)
+		{
+			FInputModeGameOnly InputModeData;
+			PC->SetInputMode(InputModeData);
+			PC->SetShowMouseCursor(false);
+		}
+	}
+}
+
 bool UMenu::Initialize()
 {
 	if (!Super::Initialize()) return false;
@@ -38,6 +58,13 @@ bool UMenu::Initialize()
 		JoinButton->OnClicked.AddDynamic(this, &ThisClass::OnClickJoinButton);
 
 	return true;
+}
+
+void UMenu::NativeDestruct()
+{
+	MenuTearDown();
+
+	Super::NativeDestruct();
 }
 
 void UMenu::OnClickHostButton()
@@ -54,7 +81,12 @@ void UMenu::OnClickHostButton()
 
 	if (MultiplayerSupportSubsystem)
 	{
-		MultiplayerSupportSubsystem->CreateSession(4, FString("FreeForAll"));
+		MultiplayerSupportSubsystem->CreateSession(NumOfpublicConnection, MatchType);
+		UWorld* WorldPtr = GetWorld();
+		if (WorldPtr)
+		{
+			WorldPtr->ServerTravel(FString("/Game/ThirdPerson/Maps/Lobby?listen"));
+		}
 	}
 }
 
