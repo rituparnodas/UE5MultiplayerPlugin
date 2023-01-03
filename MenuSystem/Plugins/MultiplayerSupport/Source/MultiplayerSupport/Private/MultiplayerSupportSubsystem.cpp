@@ -12,10 +12,7 @@ UMultiplayerSupportSubsystem::UMultiplayerSupportSubsystem():
 	StartSessionCompleteDelegate(FOnStartSessionCompleteDelegate::CreateUObject(this, &ThisClass::OnStartSessionComplete))
 {
 	IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
-	if (Subsystem)
-	{
-		SessionInterface = Subsystem->GetSessionInterface();
-	}
+	if (Subsystem) SessionInterface = Subsystem->GetSessionInterface();
 }
 
 void UMultiplayerSupportSubsystem::CreateSession(int32 NumPublicConnections, FString MatchType)
@@ -39,7 +36,11 @@ void UMultiplayerSupportSubsystem::CreateSession(int32 NumPublicConnections, FSt
 
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 	if (!SessionInterface->CreateSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, *LastSessionSettings))
+	{
 		SessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegateHandle);
+
+		MultiplayerOnSessionComplete.Broadcast(false);
+	}
 }
 
 void UMultiplayerSupportSubsystem::FindSessions(int32 MaxSearchResults)
@@ -60,6 +61,9 @@ void UMultiplayerSupportSubsystem::StartSession()
 
 void UMultiplayerSupportSubsystem::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful)
 {
+	if (SessionInterface) SessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegateHandle);
+
+	MultiplayerOnSessionComplete.Broadcast(bWasSuccessful);
 }
 
 void UMultiplayerSupportSubsystem::OnFindSessionsComplete(bool bWasSuccessful)

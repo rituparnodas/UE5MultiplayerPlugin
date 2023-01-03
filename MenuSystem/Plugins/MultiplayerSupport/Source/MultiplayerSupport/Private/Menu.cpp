@@ -3,6 +3,7 @@
 #include "Menu.h"
 #include "MultiplayerSupportSubsystem.h"
 #include "Components/Button.h"
+#include "OnlineSessionSettings.h"
 
 void UMenu::MenuSetup(int32 PublicConnections, FString TypeOfMatch)
 {
@@ -28,6 +29,7 @@ void UMenu::MenuSetup(int32 PublicConnections, FString TypeOfMatch)
 
 	UGameInstance* GI = GetGameInstance();
 	if (GI) MultiplayerSupportSubsystem = GI->GetSubsystem<UMultiplayerSupportSubsystem>();
+	if (MultiplayerSupportSubsystem) MultiplayerSupportSubsystem->MultiplayerOnSessionComplete.AddDynamic(this, &ThisClass::OnCreateSession);
 }
 
 void UMenu::MenuTearDown()
@@ -51,11 +53,8 @@ bool UMenu::Initialize()
 {
 	if (!Super::Initialize()) return false;
 
-	if (HostButton)
-		HostButton->OnClicked.AddDynamic(this, &ThisClass::OnClickHostButton);
-
-	if (JoinButton)
-		JoinButton->OnClicked.AddDynamic(this, &ThisClass::OnClickJoinButton);
+	if (HostButton) HostButton->OnClicked.AddDynamic(this, &ThisClass::OnClickHostButton);
+	if (JoinButton) JoinButton->OnClicked.AddDynamic(this, &ThisClass::OnClickJoinButton);
 
 	return true;
 }
@@ -65,6 +64,25 @@ void UMenu::NativeDestruct()
 	MenuTearDown();
 
 	Super::NativeDestruct();
+}
+
+void UMenu::OnCreateSession(bool bWasSuccessful)
+{
+	if (bWasSuccessful)
+	{
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1,
+				15.f,
+				FColor::Yellow,
+				FString::Printf(TEXT("Session Created Successfully"))
+			);
+
+			UWorld* WorldPtr = GetWorld();
+			if (WorldPtr) WorldPtr->ServerTravel(FString("/Game/ThirdPerson/Maps/Lobby?listen"));
+		}
+	}
 }
 
 void UMenu::OnClickHostButton()
@@ -79,15 +97,7 @@ void UMenu::OnClickHostButton()
 		);
 	}
 
-	if (MultiplayerSupportSubsystem)
-	{
-		MultiplayerSupportSubsystem->CreateSession(NumOfpublicConnection, MatchType);
-		UWorld* WorldPtr = GetWorld();
-		if (WorldPtr)
-		{
-			WorldPtr->ServerTravel(FString("/Game/ThirdPerson/Maps/Lobby?listen"));
-		}
-	}
+	if (MultiplayerSupportSubsystem) MultiplayerSupportSubsystem->CreateSession(NumOfpublicConnection, MatchType);
 }
 
 void UMenu::OnClickJoinButton()
