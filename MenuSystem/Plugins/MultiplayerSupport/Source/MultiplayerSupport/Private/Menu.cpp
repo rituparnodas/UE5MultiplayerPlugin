@@ -79,18 +79,18 @@ void UMenu::OnCreateSession(bool bWasSuccessful)
 {
 	if (bWasSuccessful)
 	{
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(
-				-1,
-				15.f,
-				FColor::Yellow,
-				FString::Printf(TEXT("Session Created Successfully"))
-			);
+		//if (GEngine)
+		//{
+			//GEngine->AddOnScreenDebugMessage(
+			//	-1,
+			//	15.f,
+			//	FColor::Yellow,
+			//	FString::Printf(TEXT("Session Created Successfully"))
+			//);
 
 			UWorld* WorldPtr = GetWorld();
 			if (WorldPtr) WorldPtr->ServerTravel(PathToLobby);
-		}
+		//}
 	}
 	else
 	{
@@ -155,15 +155,15 @@ void UMenu::OnStartSession(bool bWasSuccessful)
 
 void UMenu::OnClickHostButton()
 {
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(
-			-1,
-			15.f,
-			FColor::Blue,
-			FString::Printf(TEXT("Host Button Clicked"))
-		);
-	}
+	//if (GEngine)
+	//{
+	//	GEngine->AddOnScreenDebugMessage(
+	//		-1,
+	//		15.f,
+	//		FColor::Blue,
+	//		FString::Printf(TEXT("Host Button Clicked"))
+	//	);
+	//}
 	if (HostButton) HostButton->SetIsEnabled(false);
 	if (MultiplayerSupportSubsystem) MultiplayerSupportSubsystem->CreateSession(NumOfpublicConnection, MatchType);
 }
