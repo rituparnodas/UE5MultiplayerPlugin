@@ -20,7 +20,7 @@ class MULTIPLAYERSUPPORT_API UMenu : public UUserWidget
 
 public:
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Initialize")
 		void MenuSetup(int32 PublicConnections = 4, FString TypeOfMatch = TEXT("FreeForAll"), FString LobbyPath = TEXT("/Game/ThirdPerson/Maps/Lobby"));
 
 	void MenuTearDown();
