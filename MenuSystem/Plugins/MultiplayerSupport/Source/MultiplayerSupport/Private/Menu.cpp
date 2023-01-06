@@ -6,10 +6,11 @@
 #include "OnlineSessionSettings.h"
 #include "OnlineSubsystem.h"
 
-void UMenu::MenuSetup(int32 PublicConnections, FString TypeOfMatch)
+void UMenu::MenuSetup(int32 PublicConnections, FString TypeOfMatch, FString LobbyPath)
 {
 	NumOfpublicConnection = PublicConnections;
 	MatchType = TypeOfMatch;
+	PathToLobby = FString::Printf(TEXT("%s?listen"), *LobbyPath);
 
 	AddToViewport();
 	SetVisibility(ESlateVisibility::Visible);
@@ -88,8 +89,12 @@ void UMenu::OnCreateSession(bool bWasSuccessful)
 			);
 
 			UWorld* WorldPtr = GetWorld();
-			if (WorldPtr) WorldPtr->ServerTravel(FString("/Game/ThirdPerson/Maps/Lobby?listen"));
+			if (WorldPtr) WorldPtr->ServerTravel(PathToLobby);
 		}
+	}
+	else
+	{
+		if (HostButton) HostButton->SetIsEnabled(true);
 	}
 }
 
@@ -108,6 +113,10 @@ void UMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResu
 		{
 			MultiplayerSupportSubsystem->JoinSession(Result);
 		}
+	}
+	if (!bWasSuccessful || SessionResults.Num() <= 0)
+	{
+		if (JoinButton) JoinButton->SetIsEnabled(true);
 	}
 }
 
@@ -128,6 +137,11 @@ void UMenu::OnJoinSession(EOnJoinSessionCompleteResult::Type Result)
 				PC->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
 			}
 		}
+	}
+
+	if (Result != EOnJoinSessionCompleteResult::Success)
+	{
+		if (JoinButton) JoinButton->SetIsEnabled(true);
 	}
 }
 
@@ -150,12 +164,13 @@ void UMenu::OnClickHostButton()
 			FString::Printf(TEXT("Host Button Clicked"))
 		);
 	}
-
+	if (HostButton) HostButton->SetIsEnabled(false);
 	if (MultiplayerSupportSubsystem) MultiplayerSupportSubsystem->CreateSession(NumOfpublicConnection, MatchType);
 }
 
 void UMenu::OnClickJoinButton()
 {
+	if (JoinButton) JoinButton->SetIsEnabled(false);
 	if (MultiplayerSupportSubsystem)
 	{
 		MultiplayerSupportSubsystem->FindSessions(10000);

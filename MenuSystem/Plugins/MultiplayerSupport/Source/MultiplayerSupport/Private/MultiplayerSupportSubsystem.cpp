@@ -17,10 +17,16 @@ UMultiplayerSupportSubsystem::UMultiplayerSupportSubsystem():
 
 void UMultiplayerSupportSubsystem::CreateSession(int32 NumPublicConnections, FString MatchType)
 {
-	if (!SessionInterface) return;
+	if (!SessionInterface.IsValid()) return;
 
 	FNamedOnlineSession* ExistingSession = SessionInterface->GetNamedSession(NAME_GameSession);
-	if (ExistingSession) SessionInterface->DestroySession(NAME_GameSession);
+	if (ExistingSession)
+	{
+		bCreateSessiononDestroy = true;
+		LastNumofPublicconnection = NumPublicConnections;
+		LastMatchType = MatchType;
+		DestroySession();
+	}
 
 	CreateSessionCompleteDelegateHandle = SessionInterface->AddOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegate);
 
@@ -85,6 +91,19 @@ void UMultiplayerSupportSubsystem::JoinSession(const FOnlineSessionSearchResult&
 
 void UMultiplayerSupportSubsystem::DestroySession()
 {
+	if (!SessionInterface.IsValid())
+	{
+		MultiplayerOnDestroySessionComplete.Broadcast(false);
+		return;
+	}
+
+	DestroySessionCompleteDelegateHandle = SessionInterface->AddOnDestroySessionCompleteDelegate_Handle(DestroySessionCompleteDelegate);
+
+	if (!SessionInterface->DestroySession(NAME_GameSession))
+	{
+		SessionInterface->ClearOnDestroySessionCompleteDelegate_Handle(DestroySessionCompleteDelegateHandle);
+		MultiplayerOnDestroySessionComplete.Broadcast(false);
+	}
 }
 
 void UMultiplayerSupportSubsystem::StartSession()
@@ -124,6 +143,16 @@ void UMultiplayerSupportSubsystem::OnJoinSessionComplete(FName SessionName, EOnJ
 
 void UMultiplayerSupportSubsystem::OnDestroySessionComplete(FName SessionName, bool bWasSuccessful)
 {
+	if (SessionInterface)
+	{
+		SessionInterface->ClearOnDestroySessionCompleteDelegate_Handle(DestroySessionCompleteDelegateHandle);
+	}
+	if (bWasSuccessful && bCreateSessiononDestroy)
+	{
+		bCreateSessiononDestroy = false;
+		CreateSession(LastNumofPublicconnection, LastMatchType);
+	}
+	MultiplayerOnDestroySessionComplete.Broadcast(true);
 }
 
 void UMultiplayerSupportSubsystem::OnStartSessionComplete(FName SessionName, bool bWasSuccessful)

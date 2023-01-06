@@ -21,7 +21,7 @@ class MULTIPLAYERSUPPORT_API UMenu : public UUserWidget
 public:
 
 	UFUNCTION(BlueprintCallable)
-		void MenuSetup(int32 PublicConnections = 4, FString TypeOfMatch = TEXT("FreeForAll"));
+		void MenuSetup(int32 PublicConnections = 4, FString TypeOfMatch = TEXT("FreeForAll"), FString LobbyPath = TEXT("/Game/ThirdPerson/Maps/Lobby"));
 
 	void MenuTearDown();
 
@@ -59,4 +59,5 @@ private:
 
 	int32 NumOfpublicConnection{4};
 	FString MatchType{ TEXT("FreeForAll") };
+	FString PathToLobby{ TEXT("") };
 };
